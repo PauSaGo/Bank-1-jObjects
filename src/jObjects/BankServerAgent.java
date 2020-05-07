@@ -21,16 +21,19 @@ import jade.lang.acl.ACLMessage;
 import jade.core.behaviours.*;
 //import jade.domain.*;
 import jade.domain.FIPAAgentManagement.*;
+import jade.lang.acl.UnreadableException;
 //import jade.lang.acl.*;
 import jade.util.leap.*;
+import java.io.IOException;
 
 public class BankServerAgent extends Agent implements BankVocabulary {
 // -------------------------------------------------------------------
 
    private int idCnt = 0;
-   private Map accounts = new HashMap();
-   private Map operations = new HashMap();
+   private final Map accounts = new HashMap();
+   private final Map operations = new HashMap();
 
+   @Override
    protected void setup() {
 // ------------------------
 
@@ -48,6 +51,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          super(a);
       }
 
+      @Override
       public void action() {
 
          ServiceDescription sd = new ServiceDescription();
@@ -67,7 +71,6 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          }
          catch (Exception ex) {
             System.out.println("Failed registering with DF! Shutting down...");
-            ex.printStackTrace();
             doDelete();
          }
       }
@@ -82,6 +85,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          super(a);
       }
 
+      @Override
       public void action() {
 
          ACLMessage msg = receive();
@@ -116,14 +120,14 @@ public class BankServerAgent extends Agent implements BankVocabulary {
                default: replyNotUnderstood(msg);
             }
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(Exception ex) {}
       }
    }
 
    class HandleCreateAccount extends OneShotBehaviour {
 // ----------------------------------------------------  Handler for a CreateAccount request
 
-      private ACLMessage request;
+      private final ACLMessage request;
 
       HandleCreateAccount(Agent a, ACLMessage request) {
 
@@ -131,6 +135,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          this.request = request;
       }
 
+      @Override
       public void action() {
 
          try {
@@ -147,14 +152,14 @@ public class BankServerAgent extends Agent implements BankVocabulary {
             operations.put(id, new ArrayList());
             System.out.println("Account created!");
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(UnreadableException | IOException ex) {}
       }
    }
 
    class HandleOperation extends OneShotBehaviour {
 // ------------------------------------------------  Handler for an Operation request
 
-      private ACLMessage request;
+      private final ACLMessage request;
 
       HandleOperation(Agent a, ACLMessage request) {
 
@@ -162,6 +167,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          this.request = request;
       }
 
+      @Override
       public void action() {
 
          try {
@@ -176,14 +182,14 @@ public class BankServerAgent extends Agent implements BankVocabulary {
             send(reply);
             System.out.println("Operation processed.");
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(UnreadableException | IOException ex) {}
       }
    }
 
    class HandleInformation extends OneShotBehaviour {
 // --------------------------------------------------  Handler for an Information query
 
-      private ACLMessage query;
+      private final ACLMessage query;
 
       HandleInformation(Agent a, ACLMessage query) {
 
@@ -191,6 +197,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          this.query = query;
       }
 
+      @Override
       public void action() {
          try {
             Information info = (Information) query.getContentObject();
@@ -205,7 +212,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
             System.out.println("Information processed.");
          }
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(UnreadableException | IOException ex) {}
       }
    }
 
@@ -219,7 +226,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          reply.setContentObject(content);
          send(reply);
       }
-      catch(Exception ex) { ex.printStackTrace(); }
+      catch(UnreadableException | IOException ex) {}
    }
 
    Object processOperation(MakeOperation mo) {
@@ -343,6 +350,7 @@ class Account implements java.io.Serializable {
       this.balance = balance;
    }
 
+   @Override
    public String toString() {
       return name + "  # " + id + "  --> balance = " + balance;
    }
@@ -417,6 +425,7 @@ class Operation implements BankVocabulary, java.io.Serializable {
       return "Admin.";
    }
 
+   @Override
    public String toString() {
       return "\n\t" + date + "  " + getName() +
              "  " + amount + "  " + balance;
@@ -477,6 +486,7 @@ class OperationList implements java.io.Serializable {
       this.operations = operations;
    }
 
+   @Override
    public String toString() {
       String s = "\n\tLIST OF OPERATIONS:";
       for (Iterator it = operations.iterator(); it.hasNext();) {

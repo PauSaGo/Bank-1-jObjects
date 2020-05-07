@@ -14,7 +14,6 @@ package jObjects;
 *********************************************************************************/
 
 import java.io.*;
-import java.util.Date;
 
 import jade.core.*;
 import jade.core.behaviours.*;
@@ -31,8 +30,9 @@ public class BankClientAgent extends Agent implements BankVocabulary {
    private int command = WAIT;
    private int cnt = 0;
    private AID server;
-   private List accounts = new ArrayList();
+   private final List accounts = new ArrayList();
 
+   @Override
    protected void setup() {
 
    // Set this agent main behaviour
@@ -47,6 +47,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 		 command = WAIT;
 	  }
 
+      @Override
       public void action() {
 
          command = getUserChoice();
@@ -153,6 +154,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 
 	     addSubBehaviour(new WakerBehaviour(myAgent, 5000) {
 
+                    @Override
 		    protected void handleElapsedTimeout() {
 			   System.out.println("\n\tNo response from server. Please, try later!");
 			   addBehaviour(new WaitUserCommand(myAgent));
@@ -171,6 +173,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 	     super(a);
 	  }
 
+      @Override
 	  public void action() {
 
 	     ACLMessage msg = receive(MessageTemplate.MatchSender(server));
@@ -236,13 +239,15 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 		          else  System.out.println("\nUnexpected msg from server!");
 		       }
 		    }
-		    catch (Exception e) { e.printStackTrace(); }
+		    catch (Exception e) {}
 		 }
 	     finished = true;
 	  }
 
+      @Override
 	  public boolean done() { return finished; }
 
+      @Override
 	  public int onEnd() {
 	     addBehaviour(new WaitUserCommand(myAgent));
 	     return 0;
@@ -266,7 +271,6 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 		 else  System.out.println("Couldn't localize server!");
       }
       catch (Exception ex) {
-	     ex.printStackTrace();
          System.out.println("Failed searching int the DF!");
 	  }
    }
@@ -323,7 +327,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          String in = buf.readLine();
          return Integer.parseInt(in);
 	  }
-	  catch (Exception ex) { ex.printStackTrace(); }
+	  catch (IOException | NumberFormatException ex) {}
 	  return 0;
    }
 
@@ -336,7 +340,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          String in = buf.readLine();
          return Integer.parseInt(in);
 	  }
-	  catch (Exception ex) { ex.printStackTrace(); }
+	  catch (IOException | NumberFormatException ex) {}
 	  return -1;
    }
 
@@ -348,7 +352,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 		 BufferedReader buf = new BufferedReader(new InputStreamReader(System.in));
          return buf.readLine();
 	  }
-	  catch (Exception ex) { ex.printStackTrace(); }
+	  catch (Exception ex) {}
 	  return null;
    }
 
@@ -368,6 +372,6 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 		 send(msg);
 	     addBehaviour(new WaitServerResponse(this));
 	  }
-	  catch (Exception ex) { ex.printStackTrace(); }
+	  catch (Exception ex) {}
    }
 }
