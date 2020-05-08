@@ -1,0 +1,8 @@
+jObjects.Problem
+jObjects.CreateAccount
+jObjects.BankServerAgent
+jObjects.Operation
+jObjects.MakeOperation
+jObjects.Account
+jObjects.Information
+jObjects.OperationList
